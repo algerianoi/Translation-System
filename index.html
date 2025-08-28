@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Divs</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+    }
+    .container {
+        margin-top: 20px;
+    }
+    .card {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+    }
+    .hidden-div {
+        display: block;
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+    }
+    button {
+        cursor: pointer;
+    }
+</style>
+<meta name="version" content="9.1">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="style.css">
+<script type="text/javascript" src="assets/libs.js"></script>
+<script type="text/javascript" src="assets/w3.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<h2>Problem Set</h2>
+<button id="addDivBtn">Add a Problem</button>
+
+<div class="container" id="container"></div>
+
+<script>
+    w3.includeHTML();
+	var renderer = new marked.Renderer();
+	var original_table_renderer = renderer.table;
+
+	// Enable resize option for images
+	renderer.image = function(href, title, text) {
+		var tags = '';
+		if (title) {
+			size = title.split('x');
+			if (size[1])
+				tags = 'width=' + size[0] + ' height=' + size[1];
+			else
+				tags = 'width=' + size[0];
+		} else if (href && href.indexOf('=') != -1) {
+			size = href.split('=')[1].split('x');
+			href = href.split('=')[0];
+			if (size[1])
+				tags = 'width=' + size[0] + ' height=' + size[1];
+			else
+				tags = 'width=' + size[0];
+		}
+		return ('<div style="page-break-inside:avoid"><img src="' + href + '" alt="' + text + '" ' + tags + '></div>');
+	};
+
+	renderer.table = function(header, body) {
+		var html = '';
+		var tags = 'style="page-break-inside:avoid;"';
+		if (header.search('%ltr%') < 0) {
+			tags += ' dir="ltr"';
+		} else {
+			header = header.replace('%ltr%', '');
+		}
+		html = '<div ' + tags + '>' + original_table_renderer(header, body) + '</div>';
+		return html;
+	}
+
+
+	// remove trailing newline in code blocks
+	renderer.code = function(code, language) {
+		return ('<pre style="page-break-inside:avoid;"><code>' + code + '</code></pre>');
+	};
+
+	// global options
+	marked.setOptions({
+		renderer: renderer,
+		gfm: true,
+		tables: true,
+		breaks: false,
+		pedantic: false,
+		sanitize: false,
+		smartLists: true,
+		smartypants: false
+	});
+
+    function updateOutput(a) {
+        console.log(a);
+        document.getElementById(`outPut${a}`).innerHTML = marked(document.getElementById(`markdownInput${a}`).value);
+        renderMathInElement(document.getElementById(`outPut${a}`));
+    }
+
+	function escapeForJS(str) {
+		return str
+		.replace(/\\/g, "\\\\")  // backslash
+		.replace(/`/g, "\\`")    // backtick
+		.replace(/\$/g, "\\$")   // template literal $
+		.replace(/"/g, '\\"')    // double quotes
+		.replace(/'/g, "\\'")    // single quotes
+		.replace(/\n/g, "\\n")   // newline
+		.replace(/\r/g, "\\r");  // carriage return
+	}
+
+    async function openOutputWithUserText(a) {
+		const userText = document.getElementById(`markdownInput${a}`).value;
+		if (!userText) {
+			alert("Please enter something.");
+			return;
+		}
+		
+		const newTab = window.open("output.html", "_blank");
+		newTab.userMarkdown = userText;
+		newTab.document.close();
+	}
+
+    var i = 0;
+    const container = document.getElementById('container');
+    const addDivBtn = document.getElementById('addDivBtn');
+
+    addDivBtn.addEventListener('click', () => {
+        i = i + 1;
+        // Create new card
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        // Add text
+        const text = document.createElement('p');
+        text.textContent = `Problem ${i}`;
+        card.appendChild(text);
+
+        // Add toggle button
+        const toggleBtn = document.createElement('button');
+        toggleBtn.textContent = 'Show/Hide';
+        card.appendChild(toggleBtn);
+
+        // Add hidden div
+        const hiddenDiv = document.createElement('div');
+        hiddenDiv.className = 'hidden-div';
+        hiddenDiv.style.display = 'block';
+        card.appendChild(hiddenDiv);
+
+        // Toggle button event
+        toggleBtn.addEventListener('click', () => {
+            hiddenDiv.style.display = hiddenDiv.style.display === 'none' ? 'block' : 'none';
+        });
+
+        const hiddenTextArea = document.createElement('textarea');
+        hiddenTextArea.id = `markdownInput${i}`;
+        hiddenDiv.appendChild(hiddenTextArea);
+
+        hiddenTextArea.addEventListener('input', () => {updateOutput(i)});
+
+        const hiddenOutput = document.createElement('div');
+        hiddenOutput.id = `outPut${i}`;
+        hiddenDiv.appendChild(hiddenOutput);
+
+        const viewBtn = document.createElement('button');
+        viewBtn.textContent = 'View PDF';
+        hiddenDiv.appendChild(viewBtn);
+
+        viewBtn.addEventListener('click', () => {openOutputWithUserText(i)});
+
+        // Add card to container
+        container.appendChild(card);
+    });
+</script>
+
+</body>
+</html>
