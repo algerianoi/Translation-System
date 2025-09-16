@@ -122,7 +122,9 @@ Contact through the issues in [the development repository](https://github.com/io
 		<div w3-include-html="footer.html"></div>
 	</div>
 	<script>
-		w3.includeHTML();
+		w3.includeHTML(() => {
+			readJsonProp();
+		});
 
 		var version_meta = document.querySelector('meta[name="version"]');
 		if (version_meta)
@@ -198,23 +200,11 @@ Contact through the issues in [the development repository](https://github.com/io
 			renderMarkdownText(window.userMarkdown);
 		}
 
-		function readJsonProp(file) {
-			var rawFile = new XMLHttpRequest();
-			rawFile.open("GET", file, true);
-			rawFile.onreadystatechange = function () {
-				if (rawFile.readyState === 4) {
-					if (rawFile.status === 200 || rawFile.status == 0) {
-						var props = JSON.parse(rawFile.responseText);
-						Object.keys(props).forEach(function(key) {
-							var elem = document.getElementById("prop_"+key);
-							if (elem)
-								elem.textContent = props[key];
-						})
-					document.title = props["html_title"] ? props["html_title"] : "Markdown Viewer";
-					}
-				}
-			}
-			rawFile.send(null);
+		function readJsonProp() {
+			document.getElementById('prop_task_name').textContent = window.taskName || "";
+			document.getElementById('prop_task_date').textContent = window.taskDate ? String(window.taskDate) : "";
+			document.getElementById('memoryLimit').textContent = window.memoryLimit || "";
+			document.getElementById('timeLimit').textContent = window.timeLimit || "";
 		}
 
 		showingCredit = false;
@@ -239,7 +229,7 @@ Contact through the issues in [the development repository](https://github.com/io
 			else
 				toggleCredit();
 		}, false);
-
+		
 
 		function isOldFirefox() {
 			var ua = window.navigator.userAgent;
@@ -256,8 +246,6 @@ Contact through the issues in [the development repository](https://github.com/io
 		}
 
 		readTextFile("index.md", !isLocalFile() || isOldFirefox());
-
-		readJsonProp(json_);
 	</script>
 </body>
 </html>

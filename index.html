@@ -3,43 +3,220 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dynamic Divs</title>
+<title>AOI Text Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-    }
-    .container {
-        margin-top: 20px;
-    }
-    .card {
-        border: 1px solid #ccc;
-        padding: 15px;
-        margin-bottom: 10px;
-        border-radius: 5px;
-    }
-    .hidden-div {
-        display: block;
-        margin-top: 10px;
-        padding: 10px;
-        background-color: #f0f0f0;
-        border-radius: 5px;
-    }
-    button {
-        cursor: pointer;
-    }
+  body {
+    margin: 0;
+    font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #f0f4ff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  header h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+  }
+
+  /* Add Problem button */
+  #addDivBtn {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.2s;
+  }
+  #addDivBtn::before {
+    content: "+";
+    font-size: 18px;
+    font-weight: bold;
+  }
+  #addDivBtn:hover {
+    opacity: 0.8;
+  }
+
+  .container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .card {
+    border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    padding: 16px;
+    margin-bottom: 16px;
+    transition: 0.2s;
+    position: relative;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+  }
+
+  .card p {
+    margin: 0 0 10px;
+    font-weight: 600;
+  }
+
+  .card button {
+    padding: 6px 12px;
+    margin-right: 8px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    transition: background 0.2s;
+  }
+  .card button:hover {
+    background: rgba(255,255,255,0.2);
+  }
+
+  .hidden-div {
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    gap: 16px;
+  }
+
+  textarea {
+    flex: 1;
+    min-height: 200px;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    resize: vertical;
+    background: rgba(0,0,0,0.3);
+    color: #fff;
+    font-size: 14px;
+    font-family: monospace;
+    outline: none;
+  }
+
+  .hidden-div div {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.02);
+    min-height: 200px;
+    overflow-y: auto;
+  }
+
+  /* Modal overlay */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  /* Modal window */
+  .modal {
+    background: white;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(128,128,128,0.15), transparent 60%),
+      radial-gradient(circle at 70% 60%, rgba(128,128,128,0.15), transparent 60%),
+      radial-gradient(circle at 40% 80%, rgba(128,128,128,0.15), transparent 60%);
+    border-radius: 12px;
+    padding: 20px;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    animation: popIn 0.25s ease;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal label {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    font-weight: 600;
+    color: #151c4e;
+  }
+  .modal input {
+    margin-top: 4px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: none;
+    background: #26476a;
+    color: #ffffff;
+    font-size: 14px;
+    outline: none;
+  }
+
+  /* Modal buttons */
+  .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .modal-buttons button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .modal-buttons .cancel {
+    background: #ccc;
+    color: #151c4e;
+  }
+  .modal-buttons .save {
+    background: #26476a;
+    color: #fff;
+  }
 </style>
 <meta name="version" content="9.1">
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="style.css">
 <script type="text/javascript" src="assets/libs.js"></script>
 <script type="text/javascript" src="assets/w3.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
-<h2>Problem Set</h2>
-<button id="addDivBtn">Add a Problem</button>
+<header>
+  <h1>AOI Text Editor</h1>
+  <button id="addDivBtn">Add a Problem</button>
+</header>
 
 <div class="container" id="container"></div>
 
@@ -48,7 +225,6 @@
 	var renderer = new marked.Renderer();
 	var original_table_renderer = renderer.table;
 
-	// Enable resize option for images
 	renderer.image = function(href, title, text) {
 		var tags = '';
 		if (title) {
@@ -80,13 +256,10 @@
 		return html;
 	}
 
-
-	// remove trailing newline in code blocks
 	renderer.code = function(code, language) {
 		return ('<pre style="page-break-inside:avoid;"><code>' + code + '</code></pre>');
 	};
 
-	// global options
 	marked.setOptions({
 		renderer: renderer,
 		gfm: true,
@@ -99,22 +272,11 @@
 	});
 
     function updateOutput(a) {
-        console.log(a);
         document.getElementById(`outPut${a}`).innerHTML = marked(document.getElementById(`markdownInput${a}`).value);
         renderMathInElement(document.getElementById(`outPut${a}`));
     }
 
-	function escapeForJS(str) {
-		return str
-		.replace(/\\/g, "\\\\")  // backslash
-		.replace(/`/g, "\\`")    // backtick
-		.replace(/\$/g, "\\$")   // template literal $
-		.replace(/"/g, '\\"')    // double quotes
-		.replace(/'/g, "\\'")    // single quotes
-		.replace(/\n/g, "\\n")   // newline
-		.replace(/\r/g, "\\r");  // carriage return
-	}
-
+    // fixed: use the problem index 'a' (argument) instead of global i
     async function openOutputWithUserText(a) {
 		const userText = document.getElementById(`markdownInput${a}`).value;
 		if (!userText) {
@@ -124,6 +286,14 @@
 		
 		const newTab = window.open("output.html", "_blank");
 		newTab.userMarkdown = userText;
+
+        // Use the requested problem index 'a' (guarded) — previously this incorrectly used 'i'
+        const pd = problemsData[a] || {};
+        newTab.taskName    = pd.taskName    || "";
+        newTab.taskDate    = pd.taskDate    || "";
+        newTab.memoryLimit = pd.memoryLimit || "";
+        newTab.timeLimit   = pd.timeLimit   || "";
+
 		newTab.document.close();
 	}
 
@@ -131,31 +301,32 @@
     const container = document.getElementById('container');
     const addDivBtn = document.getElementById('addDivBtn');
 
+    const problemsData = {};
+
     addDivBtn.addEventListener('click', () => {
         i = i + 1;
-        // Create new card
         const card = document.createElement('div');
         card.className = 'card';
 
-        // Add text
         const text = document.createElement('p');
         text.textContent = `Problem ${i}`;
         card.appendChild(text);
 
-        // Add toggle button
         const toggleBtn = document.createElement('button');
         toggleBtn.textContent = 'Show/Hide';
         card.appendChild(toggleBtn);
 
-        // Add hidden div
+        const customizeBtn = document.createElement('button');
+        customizeBtn.textContent = 'Customize';
+        card.appendChild(customizeBtn);
+
         const hiddenDiv = document.createElement('div');
         hiddenDiv.className = 'hidden-div';
-        hiddenDiv.style.display = 'block';
+        hiddenDiv.style.display = 'flex';
         card.appendChild(hiddenDiv);
 
-        // Toggle button event
         toggleBtn.addEventListener('click', () => {
-            hiddenDiv.style.display = hiddenDiv.style.display === 'none' ? 'block' : 'none';
+            hiddenDiv.style.display = hiddenDiv.style.display === 'none' ? 'flex' : 'none';
         });
 
         const hiddenTextArea = document.createElement('textarea');
@@ -170,11 +341,69 @@
 
         const viewBtn = document.createElement('button');
         viewBtn.textContent = 'View PDF';
-        hiddenDiv.appendChild(viewBtn);
+        card.appendChild(viewBtn);
 
+        // pass the correct index to the function (this is fine)
         viewBtn.addEventListener('click', () => {openOutputWithUserText(i)});
 
-        // Add card to container
+        // ----- NEW: Create modal per card -----
+        const modalOverlay = document.createElement('div');
+        modalOverlay.className = 'modal-overlay';
+
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+
+        const fields = [
+          { label: "Task Name", type: "text", id: `taskName${i}`, placeholder: "Enter task name" },
+          { label: "Date", type: "date", id: `taskDate${i}` },
+          { label: "Memory Limit", type: "text", id: `memoryLimit${i}`, placeholder: "e.g. 256MB" },
+          { label: "Time Limit", type: "text", id: `timeLimit${i}`, placeholder: "e.g. 2s" }
+        ];
+
+        fields.forEach(f => {
+          const l = document.createElement('label');
+          l.textContent = f.label;
+          const input = document.createElement('input');
+          input.type = f.type;
+          input.id = f.id;
+          if (f.placeholder) input.placeholder = f.placeholder;
+          l.appendChild(input);
+          modal.appendChild(l);
+        });
+
+        const modalButtons = document.createElement('div');
+        modalButtons.className = 'modal-buttons';
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'cancel';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.onclick = () => { modalOverlay.style.display = 'none'; };
+
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'save';
+        saveBtn.textContent = 'Save';
+        saveBtn.onclick = () => {
+          // 🔹 Save into problemsData for THIS problem index (i)
+          problemsData[i] = {
+            taskName: document.getElementById(`taskName${i}`).value,
+            taskDate: document.getElementById(`taskDate${i}`).value,
+            memoryLimit: document.getElementById(`memoryLimit${i}`).value,
+            timeLimit: document.getElementById(`timeLimit${i}`).value
+          };
+          console.log("Saved data for problem", i, problemsData[i]);
+          modalOverlay.style.display = 'none';
+        };
+
+        modalButtons.appendChild(cancelBtn);
+        modalButtons.appendChild(saveBtn);
+        modal.appendChild(modalButtons);
+        modalOverlay.appendChild(modal);
+        document.body.appendChild(modalOverlay);
+
+        customizeBtn.addEventListener('click', () => {
+          modalOverlay.style.display = 'flex';
+        });
+
         container.appendChild(card);
     });
 </script>
